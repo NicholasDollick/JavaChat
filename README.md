@@ -1,7 +1,7 @@
 # Java
 Projects made in Java
 
-##**P1**
+## **P1**
 
 Contains various uses of GPS functionality.
 "SearchNear" uses Google Maps information to provide GPS data. 
