@@ -6,12 +6,17 @@ Projects made in Java
 Contains various uses of GPS functionality.
 "SearchNear" uses Google Maps information to provide GPS data. 
 Input for this are formatted as:
-{
+
      <Name of Place>
      <Address>
      <Tags>
      <Latitude>
-     <Longitude>
-}
+     <Longitude> 
 
-#P2PChatService
+### **P2PChatService**
+Includes both host and client sources. In order to connect, the port number in *Server* must be changed, and the IP in either *clientTest* or *customUser* to reflect correct values. Functionality being workede on: 
+```
+Account Creation and Log-In systems. 
+Imporved UI
+File Transferring
+```
