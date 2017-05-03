@@ -14,7 +14,7 @@ Input for this are formatted as:
      <Longitude> 
 
 ### **P2PChatService**
-Includes both host and client sources. In order to connect, the port number in *Server* must be changed, and the IP in either *clientTest* or *customUser* to reflect correct values. Functionality being workede on: 
+Includes both host and client sources. In order to connect, the port number in *Server* must be changed, along with the IP in either *clientTest* or *customUser* to reflect correct values. Functionality being workede on: 
 ```
 Account Creation and Log-In systems. 
 Imporved UI
