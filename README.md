@@ -1,6 +1,13 @@
 # Java
 Projects made in Java
 
+## **Jaccard**
+Program that singles two text documents and then returns their Jaccard index. Set up to run via command line args, data can be passed using the following format:
+```
+textFileA textFileB n-gram
+```
+where "n-gram" is the size of the n-gram "shingles"
+
 ## **P1**
 
 Contains various uses of GPS functionality.
