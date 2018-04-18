@@ -1,15 +1,18 @@
 # Java
 Projects made in Java
 
-## **BlackJack**
-Text based blackjack game
-
 ## **Jaccard**
 Program that shingles two text documents and then returns their Jaccard index. Set up to run via command line args, data can be passed using the following format:
 ```
 textFileA textFileB n-gram
 ```
 where "n-gram" is the size of the n-gram "shingles"
+
+## **Shell Sort Efficiency**
+Evaluates the efficiency of several different increment sequences. Can be ran via the command line using the following format:
+```
+fileWithDataToBeSorted numberOfTrials
+```
 
 ## **P1**
 
@@ -34,5 +37,7 @@ File Transferring
 ## **Permutations**
 Takes a user defined word and search its permuation for other words
 
-## **Shell Sort Efficiency**
-Evaluates the efficiency of several different increment sequences.  
+## **BlackJack**
+Text based blackjack game
+
+
