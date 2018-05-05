@@ -1,6 +1,9 @@
 # Java
 Projects made in Java
 
+## **Friend Of A Friend**
+Emulates the idea of Facebook's suggested friends system. Program analyzes a person's friendship group, and suggests someone who has mutual friends but it not already friends with them.
+
 ## **Jaccard**
 Program that shingles two text documents and then returns their Jaccard index. Set up to run via command line args, data can be passed using the following format:
 ```
@@ -25,10 +28,7 @@ Input for this are formatted as:
      <Tags>
      <Latitude>
      <Longitude> 
-     
-## **Friend Of A Friend**
-Emulates the idea of Facebook's suggested friends system. Program analyzes a person's friendship group, and suggests someone who has mutual friends but it not already friends with them.
-
+  
 
 ### **P2PChatService**
 Includes both host and client sources. In order to connect, the port number in *Server* must be changed, along with the IP in either *clientTest* or *customUser* to reflect correct values. Functionality being worked on: 
