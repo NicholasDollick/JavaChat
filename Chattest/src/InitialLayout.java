@@ -4,6 +4,9 @@ import java.awt.event.*;
 
 // clients should generate secret key passed on from server upon session creation
 // needs to be refactored to not have a main in here
+//
+// add db support to this local test before moving forward.
+// needed: register button(with own window)
 
 public class InitialLayout{
     String name = "Chatty E2E v0.1";
@@ -39,6 +42,7 @@ public class InitialLayout{
     	JLabel chooseUsernameLabel = new JLabel("username:");
     	JLabel choosePassword = new JLabel("password:");
     	JButton enterServer = new JButton("Enter Chat Server");
+    	JButton createAccount = new JButton("Create Account");
     	enterServer.addActionListener(new enterServerButtonListener());
     	JPanel prePanel = new JPanel(new GridBagLayout());
     	
@@ -56,6 +60,7 @@ public class InitialLayout{
         prePanel.add(choosePassword, preLeft);
         prePanel.add(passwordBox, preRight);
         preFrame.add(prePanel, BorderLayout.CENTER);
+        preFrame.add(createAccount, BorderLayout.SOUTH);
         preFrame.add(enterServer, BorderLayout.SOUTH);
         preFrame.setSize(350, 350);
         preFrame.setVisible(true);
