@@ -1,25 +1,31 @@
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPublicKeySpec;
 
 public class DH {
 	private static final String TAG = "DH";
 	private static KeyPair keyPair;
 	private static KeyAgreement keyAgree;
-	public final static int pValue = 41;
-	public final static int gValue = 83;
+	//public final static int pValue = 41;
+	//public final static int gValue = 83;
+	private static final BigInteger P = BigInteger.probablePrime(512, new SecureRandom());
+	private static final BigInteger G = BigInteger.probablePrime(512, new SecureRandom());
 	
 	public static byte[] generatePublicKey() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
-		BigInteger P = BigInteger.probablePrime(512, new SecureRandom());
-		BigInteger G = BigInteger.probablePrime(512, new SecureRandom());
+
+		
+		System.out.println("[+] Generating Key...");
 		
 		DHParameterSpec dhParamSpec = new DHParameterSpec(P, G);
 		
@@ -43,10 +49,26 @@ public class DH {
 		return pubKey;
 	}
 	
-	public byte[] compareSharedKey(byte[] pubKey) {
-		
-		
-		return null;
+	public byte[] computeSharedKey(byte[] pubKey) {
+		try {
+			KeyFactory keyFactory = KeyFactory.getInstance("DiffieHellman");
+			BigInteger pubKeyBI = new BigInteger(1, pubKey); 
+			
+			System.out.println("\n[+] Computing Key...");
+			System.out.println("Y = " + pubKeyBI.toString(16));
+			
+			PublicKey pubKey2 = keyFactory.generatePublic(new DHPublicKeySpec(pubKeyBI, P, G));
+			keyAgree.doPhase(pubKey2, true);
+			byte[] sharedKey = keyAgree.generateSecret();
+			
+			System.out.println("SHARED KEY = " + sharedKey.toString());
+			
+			return sharedKey;
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return null;
+		}
 	}
 	
 	
@@ -57,7 +79,9 @@ public class DH {
     };
     
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
-    	DH.generatePublicKey();
+    	DH dh = new DH();
+    	
+    	dh.computeSharedKey(DH.generatePublicKey());
     }
 
 }
