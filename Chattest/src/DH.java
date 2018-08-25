@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import javax.crypto.KeyAgreement;
+import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 
 public class DH {
@@ -22,19 +23,32 @@ public class DH {
 		
 		DHParameterSpec dhParamSpec = new DHParameterSpec(P, G);
 		
-		System.out.println(P.toString(16));
+		System.out.println("P = " + P.toString(16));
 		
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DiffieHellman");
 		keyGen.initialize(dhParamSpec); //consider securerandom arg
 		keyPair = keyGen.generateKeyPair();
 		
-		System.out.println(keyPair.getPublic());
+		System.out.println("Y = " + ((DHPublicKey) keyPair.getPublic()).getY().toString(16));
 		
 		keyAgree = KeyAgreement.getInstance("DiffieHellman");
 		keyAgree.init(keyPair.getPrivate());
 		
+		BigInteger pubKeyBI = ((DHPublicKey) keyPair.getPublic()).getY();
+		byte[] pubKey = pubKeyBI.toByteArray();
+		
+		System.out.println(TAG + " " + String.format("Y [%d] = %s", pubKey.length, pubKey.toString().hashCode()));
+		System.out.println("Public Key = " + pubKey);
+		
+		return pubKey;
+	}
+	
+	public byte[] compareSharedKey(byte[] pubKey) {
+		
+		
 		return null;
 	}
+	
 	
 	//modify below
     private static final byte P_BYTES[] = {
