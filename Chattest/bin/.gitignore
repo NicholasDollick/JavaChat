@@ -1,9 +1,11 @@
+/AES.class
 /InitialLayout$1.class
 /InitialLayout$enterServerButtonListener.class
 /InitialLayout$sendMessageButtonListener.class
 /InitialLayout.class
-/SecureServer.class
 /SecureServer$1.class
 /SecureServer$2.class
 /SecureServer$3.class
-/AES.class
+/SecureServer.class
+/DH.class
+/Test.class
