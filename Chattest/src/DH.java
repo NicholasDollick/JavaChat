@@ -12,7 +12,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPublicKeySpec;
 
@@ -24,6 +26,7 @@ import javax.crypto.spec.DHPublicKeySpec;
 public class DH {
 	private final String TAG = "DH";
 	private KeyPair keyPair;
+	
 	private PublicKey publicKey;
 	private PublicKey recievedPublicKey;
 	private PrivateKey privateKey;
@@ -65,82 +68,57 @@ public class DH {
             (byte)0xE9, (byte)0x2F, (byte)0x78, (byte)0xC7
     };
 	
-	//public final static int P = 41;
-	//public final static int G = 83;
-	
 	private static final BigInteger P = new BigInteger(1, P_BYTES);
 	private static final BigInteger G = BigInteger.valueOf(2);
-	
-	public byte[] generatePublicKey() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
 
-		
-		System.out.println("[+] Generating Key...");
-		
-		DHParameterSpec dhParamSpec = new DHParameterSpec(P, G);
-		
-		System.out.println("P = " + P.toString(16));
-		
-		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DiffieHellman");
-		keyGen.initialize(dhParamSpec); //consider securerandom arg
-		keyPair = keyGen.generateKeyPair();
-		
-		System.out.println("Y = " + ((DHPublicKey) keyPair.getPublic()).getY().toString(16));
-		
-		KeyAgreement keyAgree = KeyAgreement.getInstance("DiffieHellman");
-		keyAgree.init(keyPair.getPrivate());
-		
-		BigInteger pubKeyBI = ((DHPublicKey) keyPair.getPublic()).getY();
-		byte[] pubKey = pubKeyBI.toByteArray();
-		
-		//X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(pubKey);
-		
-		System.out.println(TAG + " " + String.format("Y [%d] = %s", pubKey.length, pubKey.toString().hashCode()));
-		System.out.println("Public Key = " + pubKey);
-		//System.out.println(x509KeySpec);
-		
-		return pubKey;
-	}
+	
+	//keys need to be serialized before transport through wire
 	
 	public void generateKeys() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
-
-		
-		System.out.println("[+] Generating Keys...");
-		
+		System.out.println("[+] Generating Key...");
 		DHParameterSpec dhParamSpec = new DHParameterSpec(P, G);
-		
-		System.out.println("P = " + P.toString(16));
-		
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance(TAG);
-		keyGen.initialize(dhParamSpec); //consider securerandom arg
-		keyPair = keyGen.generateKeyPair();
+		keyGen.initialize(dhParamSpec);
+		final KeyPair keyPair = keyGen.generateKeyPair();
+		
+		KeyAgreement keyAgree = KeyAgreement.getInstance(TAG);
+		keyAgree.init(keyPair.getPrivate());
 		
 		publicKey = keyPair.getPublic();
 		privateKey = keyPair.getPrivate();
 		pubKeyEnc = keyPair.getPublic().getEncoded();
-		System.out.println("Public Key = " + keyPair.getPublic());
-		System.out.println("Public Key Enc = " + keyPair.getPublic().getEncoded());
-		System.out.println("Private Key = " + keyPair.getPrivate());
+		//System.out.println("Public Key = " + publicKey);
+		//System.out.println("Public Key Enc = " + pubKeyEnc);
+		//System.out.println("Private Key = " + privateKey);
 	}
 	
-	public void getShared() throws NoSuchAlgorithmException, InvalidKeyException {
+	public void getShared() throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, IllegalStateException {
 		final KeyAgreement keyAgree = KeyAgreement.getInstance(TAG);
 		keyAgree.init(privateKey);
 		keyAgree.doPhase(recievedPublicKey, true);
 		
-		secretKey = keyAgree.generateSecret();
+		secretKey = secureSecretKey(keyAgree.generateSecret());
+	}
+	
+	private byte[] secureSecretKey(final byte[] longKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+		final SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+		final DESKeySpec desSpec = new DESKeySpec(longKey);
+		
+		return keyFactory.generateSecret(desSpec).getEncoded();
+		
 	}
 	
 	public void receiveKey(byte[] rKey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
 		KeyFactory keyFac = KeyFactory.getInstance("DH");
 		X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(rKey);
-		PublicKey testKey = keyFac.generatePublic(x509KeySpec);
-		DHParameterSpec dhFromRKey = ((DHPublicKey)testKey).getParams();
+		publicKey = keyFac.generatePublic(x509KeySpec);
+		DHParameterSpec dhFromRKey = ((DHPublicKey)publicKey).getParams();
 		KeyPairGenerator pairGen = KeyPairGenerator.getInstance(TAG);
 		pairGen.initialize(dhFromRKey);
-		KeyPair newPair = pairGen.generateKeyPair(); //maybe add to obj vars
+		keyPair = pairGen.generateKeyPair(); //maybe add to obj vars
 		KeyAgreement keyAgree = KeyAgreement.getInstance(TAG);
-		keyAgree.init(newPair.getPrivate());
-		byte[] newKeyEnc = newPair.getPublic().getEncoded();
+		keyAgree.init(keyPair.getPrivate());
+		pubKeyEnc = keyPair.getPublic().getEncoded();
 	}
 	
     public void receivePublicKeyFrom(final DH person) {
@@ -150,42 +128,20 @@ public class DH {
 	
     public PublicKey getPublicKey() {
 
-        return publicKey;
+        return this.publicKey;
     }
     
     public byte[] getPublicKeyEnc() {
 
-        return pubKeyEnc;
+        return this.pubKeyEnc;
     }
 	
 	public void printKeys() {
 		System.out.println("[+] Listing Key");
-		System.out.println("Shared Key = " + this.secretKey);
+		System.out.println("Shared Key = " + this.secretKey + " " + this.secretKey.length);
+		System.out.println(toHexString(this.secretKey));
 	}
 	
-	public byte[] computeSharedKey(byte[] pubKey) {
-		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("DiffieHellman");
-			BigInteger pubKeyBI = new BigInteger(1, pubKey); 
-			
-			System.out.println("\n[+] Computing Key...");
-			System.out.println("Y = " + pubKeyBI.toString(16));
-			
-			PublicKey pubKey2 = keyFactory.generatePublic(new DHPublicKeySpec(pubKeyBI, P, G));
-			//keyAgree.doPhase(pubKey2, true);
-			//byte[] sharedKey = keyAgree.generateSecret();
-			
-			System.out.println("PubKey2 = " + pubKey2.getEncoded());
-			//System.out.println("SHARED KEY = " + sharedKey.toString());
-			
-			//return sharedKey;
-			return null;
-			
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			return null;
-		}
-	}
 	
 	public void test(byte[] passedKey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
 		KeyFactory keyFactory = KeyFactory.getInstance("DH");
@@ -246,37 +202,29 @@ public class DH {
     	DH bob = new DH();
     	DH alice = new DH();
     	/*
-    	 * create keys
+    	 * clients create key pairs
     	 */
     	alice.generateKeys();
     	bob.generateKeys();
-    	//byte[] alicePubKey = alice.generatePublicKey();
     	
     	/*
-    	 * swap keys
+    	 * clients swap keys
     	 */
     	alice.receivePublicKeyFrom(bob);
     	bob.receivePublicKeyFrom(alice);
     	
     	/*
-    	 * generate shared
+    	 *  clients generate shared secret
     	 */
     	alice.getShared();
     	bob.getShared();
     	
+    	/*
+    	 *  display for debugging
+    	 */
     	bob.printKeys();
     	alice.printKeys();
-    	
-    	bob.receiveKey(alice.getPublicKeyEnc());
-    	
-    	//bob.generatePublicKey2();
-    	//alice.generatePublicKey2();
-    	
-    	
-    	//byte[] aliceShareKey = alice.computeSharedKey(alicePubKey);
-    	//System.out.println("Alice key = " + aliceShareKey);
-    	//byte[] bobKey = bob.computeSharedKey(alicePubKey);
-    	//System.out.println("Bobs key = " + bobKey);
+
     }
 
 }
