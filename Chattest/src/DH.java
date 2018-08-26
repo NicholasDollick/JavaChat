@@ -9,10 +9,16 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 /*
  * Contains procedure adapted from oracle documentation
@@ -103,14 +109,13 @@ public class DH {
 	}
 	
 	/*
-	 * Converts secret key to usable state 
+	 * Converts secret key to usable state for AES
 	 */
 	private byte[] secureSecretKey(final byte[] longKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
-		final SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-		final DESKeySpec desSpec = new DESKeySpec(longKey);
+		byte[] shortKey = Arrays.copyOf(longKey, 16);
+		final SecretKeySpec keySpec = new SecretKeySpec(shortKey, "AES");
 		
-		return keyFactory.generateSecret(desSpec).getEncoded();
-		
+		return keySpec.getEncoded();
 	}
     
 	/*
@@ -119,6 +124,10 @@ public class DH {
     public void receivePublicKeyFrom(final DH person) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
     	recievedPublicKeySerial = person.getPublicKey();
+    }
+    
+    public byte[] getSecret() {
+    	return this.secretKey;
     }
     
     /*
@@ -144,7 +153,7 @@ public class DH {
      */
     private void byte2hex(byte b, StringBuffer buf) {
         char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-                '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+                			'9', 'A', 'B', 'C', 'D', 'E', 'F' };
         int high = ((b & 0xf0) >> 4);
         int low = (b & 0x0f);
         buf.append(hexChars[high]);
@@ -166,11 +175,11 @@ public class DH {
         return buf.toString();
     }
     
-    
     /*
      * main used for testing implementation
      */
-    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidKeySpecException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+    	
     	
     	/*
     	 * create two clients for testing
@@ -201,7 +210,12 @@ public class DH {
     	 */
     	bob.printKeys();
     	alice.printKeys();
-
+    	
+    	String message = "hello world";
+    	byte[] test = AES.encryptTest(message, bob.getSecret());
+    	System.out.println("");
+    	System.out.println("Clear text: " + message + " \nEncrypted: " + test);
+    	System.out.println("Decrypted: " +  AES.decryptTest(test, alice.getSecret()));
     }
 
 }

@@ -1,5 +1,6 @@
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -31,16 +32,30 @@ public class AES {
 		keyVal = key;
 	}
 	
-	public String encrypt(String data) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		Key key = new SecretKeySpec(keyVal, ALGO);
-		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-		cipher.init(cipher.ENCRYPT_MODE, key);
-		byte[] encodeVal = cipher.doFinal(data.getBytes());
-		String encryptVal = Base64.getEncoder().encodeToString(encodeVal);
+
+	public static byte[] encryptTest(final String data, byte[] secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+		final SecretKeySpec keySpec = new SecretKeySpec(secretKey, 0, 16, ALGO);
+		final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+		IvParameterSpec ivParameterSpec = new IvParameterSpec(secretKey);
 		
-		return encryptVal;
+		cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivParameterSpec);
+		
+		final byte[] encryptedData = cipher.doFinal(data.getBytes());
+		
+		return encryptedData;
 	}
 	
+	public static String decryptTest(final byte[] data, byte[] secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+		final SecretKeySpec keySpec = new SecretKeySpec(secretKey, ALGO);
+		final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+		IvParameterSpec ivParameterSpec = new IvParameterSpec(secretKey);
+		
+		cipher.init(Cipher.DECRYPT_MODE, keySpec, ivParameterSpec);
+		
+		return new String(cipher.doFinal(data));
+	}
+	
+
 	public String decrypt(String data) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Key key = new SecretKeySpec(keyVal, ALGO);
 		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
@@ -51,49 +66,4 @@ public class AES {
 		
 		return decryptedValue;
 	}
-	
-	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, UnsupportedEncodingException, InvalidKeySpecException {
-		//SecretKey secKey = key.generateKey();
-		SecureRandom rand = new SecureRandom();
-		byte[] salt = new byte[16];
-		rand.nextBytes(salt);
-		
-		//use password/username combo for below
-		KeySpec spec = new PBEKeySpec("theredpowerranger".toCharArray(), salt, 65536, 256);
-		SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		byte[] key = f.generateSecret(spec).getEncoded();
-		
-		AES aes = new AES(key); //this needs to be a secret key
-		String test = aes.encrypt("Aftermath");
-		
-		System.out.println("Encrypt: " + test);
-		String test2 = aes.decrypt(test);
-		System.out.println("Decrypt: " + test2);
-		
-	}
-	
-	public static String encrypts(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-		KeyGenerator kgen = KeyGenerator.getInstance("AES");
-		kgen.init(256);
-		
-		SecretKey skey = kgen.generateKey();
-		byte[] raw = skey.getEncoded();
-		String key = Base64.getEncoder().encodeToString(raw);
-		String encryptKey = key;
-		System.out.println("--------KEY-------");
-		System.out.println(encryptKey);
-		System.out.println("------END OF KEY------");
-		SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-		Cipher cipher = Cipher.getInstance("AES");
-		byte[] iv = new byte[16];
-		SecureRandom rand = new SecureRandom();
-		rand.nextBytes(iv);
-		IvParameterSpec ivParam = new IvParameterSpec(iv);
-		cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-		String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(value.getBytes()));
-		System.out.println(encrypt);
-		
-		return encrypt;
-	}
-
 }
