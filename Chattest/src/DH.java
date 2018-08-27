@@ -212,10 +212,10 @@ public class DH {
     	alice.printKeys();
     	
     	String message = "hello world";
-    	byte[] test = AES.encryptTest(message, bob.getSecret());
+    	byte[] test = AES.encrypt(message, bob.getSecret());
     	System.out.println("");
     	System.out.println("Clear text: " + message + " \nEncrypted: " + test);
-    	System.out.println("Decrypted: " +  AES.decryptTest(test, alice.getSecret()));
+    	System.out.println("Decrypted: " +  AES.decrypt(test, alice.getSecret()));
     }
 
 }
