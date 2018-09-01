@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -10,12 +12,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-/*
- * Dependency: Apache Commons Lang 3.8
- * Used in encrypt(), for ArrayUtils.addAll()
- */
 
 public class AES {
 	
@@ -30,7 +26,7 @@ public class AES {
 	 * 
 	 * OUTPUT: byte array of generated iv and encrypted message
 	 */
-	public static byte[] encrypt(final String data, byte[] secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+	public static byte[] encrypt(final String data, byte[] secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException {
 		final SecretKeySpec keySpec = new SecretKeySpec(secretKey, 0, 16, ALGO);
 		final Cipher cipher = Cipher.getInstance(CIPH);
 		SecureRandom rand = new SecureRandom();
@@ -46,11 +42,21 @@ public class AES {
 		System.out.println(iv + " length: " + iv.length);
 		System.out.println(encryptedData + " length: " + encryptedData.length);
 		
-		final byte[] concat = ArrayUtils.addAll(iv, encryptedData);
+		final byte[] concat = concat(iv, encryptedData); // not super graceful. should be just done on return line.
+														 // this will be fixed after proper testing
 		
 		System.out.println(concat + " length: " + concat.length);
 		
 		return concat;
+	}
+	
+	private static byte[] concat(byte[] arrayA, byte[] arrayB) throws IOException {
+		ByteArrayOutputStream concatArray = new ByteArrayOutputStream(arrayA.length + arrayB.length);
+		
+		concatArray.write(arrayA);
+		concatArray.write(arrayB);
+	
+		return concatArray.toByteArray();
 	}
 	
 	/*

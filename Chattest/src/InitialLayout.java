@@ -34,6 +34,9 @@ public class InitialLayout{
         });
     }
     
+    /*
+     * contains the formatting for the login dialog
+     */
     public void preDisplay() {
     	newFrame.setVisible(false);
     	preFrame = new JFrame(name);
@@ -66,6 +69,9 @@ public class InitialLayout{
         preFrame.setVisible(true);
     }
 
+    /*
+     * formatting for main chat window
+     */
     public void display() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
