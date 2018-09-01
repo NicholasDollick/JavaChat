@@ -11,13 +11,10 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -28,13 +25,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class DH {
 	private final String TAG = "DH";
-	
 	private PublicKey publicKey;
-	//private PublicKey recievedPublicKey;
+	private PublicKey recievedPublicKey;
 	private PrivateKey privateKey;
 	private byte[] secretKey;
 	private byte[] pubKeyEnc;
-	private PublicKey recievedPublicKeySerial;
 	
 	private static final byte P_BYTES[] = {
     		(byte)0xF4, (byte)0x88, (byte)0xFD, (byte)0x58,
@@ -104,7 +99,7 @@ public class DH {
 	public void getShared() throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, IllegalStateException {
 		final KeyAgreement keyAgree = KeyAgreement.getInstance(TAG);
 		keyAgree.init(privateKey);
-		keyAgree.doPhase(recievedPublicKeySerial, true);
+		keyAgree.doPhase(recievedPublicKey, true);
 		
 		secretKey = secureSecretKey(keyAgree.generateSecret());
 	}
@@ -124,7 +119,7 @@ public class DH {
 	 */
     public void receivePublicKeyFrom(final DH person) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
-    	recievedPublicKeySerial = person.getPublicKey();
+    	recievedPublicKey = person.getPublicKey();
     }
     
     public byte[] getSecret() {

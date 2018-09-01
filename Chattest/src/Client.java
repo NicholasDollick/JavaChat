@@ -7,9 +7,8 @@ import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 
 
-@SuppressWarnings("serial")
-public class Client extends JFrame 
-{
+public class Client {
+	String name = "QNTM v0.2";
 	private JTextField userText;
 	private JTextArea chatWindow;
 	private ObjectOutputStream output;
@@ -18,14 +17,29 @@ public class Client extends JFrame
 	private String serverIP;
 	private SSLSocket connection;
 	private String userName;
+	JFrame chatFrame = new JFrame(name);
+	JTextField messageBox;
 	
 	//constructor
 	public Client(String host)
 	{
-		setTitle("Client-Side Test");
 		serverIP = host;
+		JPanel mainPanel = new JPanel();
+		mainPanel.setLayout(new BorderLayout());
+		
+		JPanel southPanel = new JPanel();
+		southPanel.setBackground(Color.BLUE);
+		southPanel.setLayout(new GridBagLayout());
+		
 		userText = new JTextField();
-		userText.setEditable(false);
+		//userText.setEditable(false);
+		userText.requestFocusInWindow();
+		
+		JButton sendMessage = new JButton("Send Message");
+		sendMessage.addActionListener(
+				new sendMessageButtonActionListener());
+		
+		//old code, prob not needed
 		userText.addActionListener(
 				new ActionListener()
 				{
@@ -36,11 +50,39 @@ public class Client extends JFrame
 					}
 				}
 		);
-		add(userText, BorderLayout.NORTH);
-		chatWindow = new JTextArea();
-		add(new JScrollPane(chatWindow), BorderLayout.CENTER);
-		setSize(600,480);
-		setVisible(true);
+		
+		JTextArea chatBox = new JTextArea();
+		chatBox.setEditable(false);
+		chatBox.setFont(new Font("Serif", Font.PLAIN, 15));
+		chatBox.setLineWrap(true);
+		
+		mainPanel.add(new JScrollPane(chatBox), BorderLayout.CENTER);
+		
+		GridBagConstraints left = new GridBagConstraints();
+		left.anchor = GridBagConstraints.LINE_START;
+		left.fill = GridBagConstraints.HORIZONTAL;
+		left.weightx = 512.0D;
+		left.weighty = 1.0D;
+		
+		GridBagConstraints right = new GridBagConstraints();
+		right.insets = new Insets(0, 10, 0, 0);
+		right.anchor = GridBagConstraints.LINE_END;
+		right.fill = GridBagConstraints.NONE;
+		right.weightx = 1.0D;
+		right.weighty = 1.0D;
+		
+		southPanel.add(userText, left);
+		southPanel.add(sendMessage, right);
+	
+		mainPanel.add(BorderLayout.SOUTH, southPanel);
+		
+		chatFrame.add(mainPanel);
+		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		chatFrame.setSize(600,480);
+		chatFrame.setVisible(true);
+		
+		//chatWindow = new JTextArea();
+		//add(new JScrollPane(chatWindow), BorderLayout.CENTER);
 	}
 	
 	//connect to server
@@ -153,19 +195,6 @@ public class Client extends JFrame
 		}
 	}
 	
-	//custom user
-	private void sendData(String message, String name)
-	{
-		try{
-			output.writeObject(name + " says:  \n" + message);
-			output.flush();
-			showMessage("\n" + name + " says \n " + message);
-			
-		}catch(IOException ioException){
-			chatWindow.append("\n ERROR: Message Cannot Be Sent \n");
-		}
-	}
-	
 	//updates chatWindow
 	private void showMessage(final String text)
 	{
@@ -187,5 +216,22 @@ public class Client extends JFrame
 		}
 				);
 		
+	}
+	
+	class sendMessageButtonActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent event) {
+			if (messageBox.getText().length() < 1) {
+				//empty message, do nothing
+			}
+			else if (messageBox.getText().equals(".clear")){
+				userText.setText("All messages cleared\n"); //name may be wrong
+				messageBox.setText("");
+			}
+			else {
+				//this is where text gets updated
+			}
+	    
+	
+		}
 	}
 }
