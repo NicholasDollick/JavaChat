@@ -14,11 +14,4 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>commons-lang3-3.8.jar</name>
-			<type>1</type>
-			<location>E:/Downloads/commons-lang3-3.8-bin/commons-lang3-3.8/commons-lang3-3.8.jar</location>
-		</link>
-	</linkedResources>
 </projectDescription>
