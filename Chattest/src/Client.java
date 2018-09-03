@@ -1,28 +1,56 @@
 import java.io.*;
 import java.awt.*;
 import java.net.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.awt.event.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 
 
 public class Client {
 	String name = "QNTM v0.2";
-	private JTextField userText;
+	//private JTextField userText;
 	private JTextArea chatWindow;
 	private ObjectOutputStream output;
 	private ObjectInputStream input;
 	private String message = "";
 	private String serverIP;
 	private SSLSocket connection;
-	private String userName;
+	private String userName = "0xFF"; //username is received from prechat login
 	JFrame chatFrame = new JFrame(name);
 	JTextField messageBox;
+	JTextArea chatBox;
+	JButton sendMessage;
+	
+	DH client = new DH(); // init DH algo
+	DH otherClient = new DH();
 	
 	//constructor
-	public Client(String host)
+	public Client(String host) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException
 	{
+		// this block is for testing only
+		client.generateKeys();
+		otherClient.generateKeys();
+		
+    	client.receivePublicKeyFrom(otherClient);
+    	otherClient.receivePublicKeyFrom(client);
+    	
+    	client.getShared();
+    	otherClient.getShared();
+		
+		// match UI of user desktop environment
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 		serverIP = host;
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
@@ -31,15 +59,15 @@ public class Client {
 		southPanel.setBackground(Color.BLUE);
 		southPanel.setLayout(new GridBagLayout());
 		
-		userText = new JTextField();
+		messageBox = new JTextField(30);
 		//userText.setEditable(false);
-		userText.requestFocusInWindow();
+		messageBox.requestFocusInWindow();
 		
-		JButton sendMessage = new JButton("Send Message");
+		sendMessage = new JButton("Send Message");
 		sendMessage.addActionListener(
 				new sendMessageButtonActionListener());
-		
-		//old code, prob not needed
+		/*
+		 * old code, prob not needed
 		userText.addActionListener(
 				new ActionListener()
 				{
@@ -50,8 +78,9 @@ public class Client {
 					}
 				}
 		);
+		*/
 		
-		JTextArea chatBox = new JTextArea();
+		chatBox = new JTextArea();
 		chatBox.setEditable(false);
 		chatBox.setFont(new Font("Serif", Font.PLAIN, 15));
 		chatBox.setLineWrap(true);
@@ -71,7 +100,7 @@ public class Client {
 		right.weightx = 1.0D;
 		right.weighty = 1.0D;
 		
-		southPanel.add(userText, left);
+		southPanel.add(messageBox, left);
 		southPanel.add(sendMessage, right);
 	
 		mainPanel.add(BorderLayout.SOUTH, southPanel);
@@ -81,8 +110,6 @@ public class Client {
 		chatFrame.setSize(600,480);
 		chatFrame.setVisible(true);
 		
-		//chatWindow = new JTextArea();
-		//add(new JScrollPane(chatWindow), BorderLayout.CENTER);
 	}
 	
 	//connect to server
@@ -211,7 +238,7 @@ public class Client {
 	{
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				userText.setEditable(tof);
+				messageBox.setEditable(tof);
 			}
 		}
 				);
@@ -223,15 +250,39 @@ public class Client {
 			if (messageBox.getText().length() < 1) {
 				//empty message, do nothing
 			}
-			else if (messageBox.getText().equals(".clear")){
-				userText.setText("All messages cleared\n"); //name may be wrong
+			else if (messageBox.getText().equals(".clear")) {
+				chatBox.setText("All messages cleared\n");
 				messageBox.setText("");
 			}
 			else {
-				//this is where text gets updated
+				try {
+					chatBox.append("<" + userName + ">" + AES.encrypt(messageBox.getText(), client.getSecret())
+							+ "\n");
+				} catch (InvalidKeyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchAlgorithmException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchPaddingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalBlockSizeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (BadPaddingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidAlgorithmParameterException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				messageBox.setText("");
 			}
-	    
-	
+			messageBox.requestFocusInWindow();
 		}
 	}
 }

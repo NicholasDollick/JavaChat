@@ -38,14 +38,14 @@ public class AES {
 		
 		final byte[] encryptedData = cipher.doFinal(data.getBytes());
 		
-		System.out.println("\nTEST"); 
-		System.out.println(iv + " length: " + iv.length);
-		System.out.println(encryptedData + " length: " + encryptedData.length);
+		System.out.println("\n[*] Data Length"); 
+		System.out.println(iv + " iv length: " + iv.length);
+		System.out.println(encryptedData + " total data length: " + encryptedData.length);
 		
 		final byte[] concat = concat(iv, encryptedData); // not super graceful. should be just done on return line.
 														 // this will be fixed after proper testing
 		
-		System.out.println(concat + " length: " + concat.length);
+		System.out.println(concat + " concat length: " + concat.length);
 		
 		return concat;
 	}
