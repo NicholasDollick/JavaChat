@@ -1,8 +1,11 @@
-# E2E Encrypted Chat Service
-An updated version of a project featured in my "Java" repo. Includes both host and client sources. In order to connect, the port number in *Server* must be changed, along with the IP in either *clientTest* or *customUser* to reflect correct values. Functionality being worked on: 
+# QNTM E2E Encrypted Chat Service
+An updated version of a project featured in my "Java" repo. Includes both host and client sources. Functionality being worked on: 
 
 ```
+DH Key Exchange
+AES encrypted communication
 Account Creation and Log-In systems. 
 Imporved UI
+Multi-Client Chat
 ```
 
