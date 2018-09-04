@@ -23,7 +23,7 @@ public class Client {
 	private String message = "";
 	private String serverIP;
 	private SSLSocket connection;
-	private String userName = "0xFF"; //username is received from prechat login
+	private String username = "0xFF"; //username is received from prechat login
 	JFrame chatFrame = new JFrame(name);
 	JTextField messageBox;
 	JTextArea chatBox;
@@ -256,7 +256,7 @@ public class Client {
 			}
 			else {
 				try {
-					chatBox.append("<" + userName + ">" + AES.encrypt(messageBox.getText(), client.getSecret())
+					chatBox.append("<" + username + ">" + AES.encrypt(messageBox.getText(), client.getSecret())
 							+ "\n");
 				} catch (InvalidKeyException e) {
 					// TODO Auto-generated catch block
@@ -283,6 +283,18 @@ public class Client {
 				messageBox.setText("");
 			}
 			messageBox.requestFocusInWindow();
+		}
+	}
+	
+	class enterServeButtonListener implements ActionListener {
+		public void actionPerformed(ActionEvent event) {
+			username = null; //usernameBox.getText();
+			if (username.length() < 1) {
+				System.out.println("Please Enter Username!");
+			}
+			else {
+				
+			}
 		}
 	}
 }
