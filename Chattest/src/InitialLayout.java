@@ -36,8 +36,14 @@ public class InitialLayout{
     
     /*
      * contains the formatting for the login dialog
+     * 
+     * password field left out until basic chat is implementde
      */
     public void preDisplay() {
+    	JTextField serverIP = new JTextField(15);
+    	JTextField portNum = new JTextField(4);
+    	JLabel enterServerIP = new JLabel("Server IP:");
+    	JLabel port = new JLabel("Port #:");
     	newFrame.setVisible(false);
     	preFrame = new JFrame(name);
     	usernameBox = new JTextField(15);
@@ -60,8 +66,12 @@ public class InitialLayout{
 
         prePanel.add(chooseUsernameLabel, preLeft);
         prePanel.add(usernameBox, preRight);
-        prePanel.add(choosePassword, preLeft);
-        prePanel.add(passwordBox, preRight);
+        //prePanel.add(choosePassword, preLeft);
+        //prePanel.add(passwordBox, preRight);
+        prePanel.add(enterServerIP, preLeft);
+        prePanel.add(serverIP, preRight);
+        prePanel.add(port, preLeft);
+        prePanel.add(portNum, preRight);
         preFrame.add(prePanel, BorderLayout.CENTER);
         preFrame.add(createAccount, BorderLayout.SOUTH);
         preFrame.add(enterServer, BorderLayout.SOUTH);
