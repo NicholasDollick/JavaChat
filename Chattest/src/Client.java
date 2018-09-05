@@ -14,8 +14,8 @@ public class Client {
 	String name = "QNTM v0.2";
 	//private JTextField userText;
 	private JTextArea chatWindow;
-	private ObjectOutputStream output;
-	private ObjectInputStream input;
+	private OutputStream output;
+	private InputStream input;
 	private String message = "";
 	private String serverIP;
 	private String port;
@@ -89,6 +89,8 @@ public class Client {
 	 */
 	public void chatWindow() throws NumberFormatException, UnknownHostException, IOException {
 		connection = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(port));
+		input = connection.getInputStream();
+		output = connection.getOutputStream();
 		// this block is for testing only
 		//client.generateKeys();
 		//otherClient.generateKeys();
@@ -99,8 +101,6 @@ public class Client {
     	//client.getShared();
     	//otherClient.getShared();
 		
-
-		//serverIP = host;
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		
@@ -109,7 +109,6 @@ public class Client {
 		southPanel.setLayout(new GridBagLayout());
 		
 		messageBox = new JTextField(30);
-		//userText.setEditable(false);
 		messageBox.requestFocusInWindow();
 		
 		sendMessage = new JButton("Send Message");
@@ -291,6 +290,8 @@ public class Client {
 			}
 			else {
 				try {
+					output.write(("<" + username + ">" + messageBox.getText()
+							+ "\n").getBytes());
 					chatBox.append("<" + username + ">" + messageBox.getText()
 							+ "\n");
 				} catch (Exception e) {

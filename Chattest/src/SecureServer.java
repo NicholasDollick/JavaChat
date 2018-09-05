@@ -16,7 +16,7 @@ public class SecureServer
 	
 	//constructor
 	public static void main(String [] args) throws InterruptedException {
-		int port = 8080;
+		int port = 2423;
 		try {
 			server = new ServerSocket(port);
 			while(true) {
