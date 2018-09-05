@@ -25,7 +25,7 @@ public class Client {
 	private SSLSocket connection;
 	private String username = "0xFF"; //username is received from prechat login
 	JFrame chatFrame = new JFrame(name);
-	JTextField messageBox;
+	JTextField messageBox; //where the user types
 	JTextArea chatBox;
 	JButton sendMessage;
 	
@@ -112,6 +112,13 @@ public class Client {
 		
 	}
 	
+	/*
+	 * Main Chat Window
+	 */
+	public void chatWindow() {
+		
+	}
+	
 	//connect to server
 	public void startRunning()
 	{
@@ -149,7 +156,7 @@ public class Client {
 	private void connectToServer() throws IOException
 	{
 		showMessage("Attempting connection...\n");
-		connection = (SSLSocket) new Socket(InetAddress.getByName(serverIP), 2423);
+		connection = (SSLSocket) new Socket(InetAddress.getByName("127.0.0.1"), 80);
 		showMessage("Connected to: " + connection.getInetAddress().getHostAddress());
 	}
 	
