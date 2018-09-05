@@ -8,13 +8,9 @@ import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 
 
-/*
- * server class that communicates over SSL
- */
-
 public class SimpleServer
 {
-	static String name = "QNTM v0.2";
+	static String name = "QNTM v0.3";
 	private String username = "Server"; //username is received from prechat login
 	static JFrame chatFrame = new JFrame(name);
 	static JTextField messageBox; //where the user types
@@ -22,7 +18,6 @@ public class SimpleServer
 	static JButton sendMessage;
 	static JFrame preFrame;
 	DH client = new DH(); // init DH algo
-	DH otherClient = new DH();
 	static JTextField usernameBox;
     static JPasswordField passwordBox;
     static JTextField serverIPInput;
@@ -61,20 +56,6 @@ public class SimpleServer
 	 * Main Chat Window
 	 */
 	public SimpleServer() throws NumberFormatException, UnknownHostException, IOException {
-		//connection = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(port));
-		//input = connection.getInputStream();
-		//output = connection.getOutputStream();
-		//bufferIn = new BufferedReader(new InputStreamReader(input));
-		// this block is for testing only
-		//client.generateKeys();
-		//otherClient.generateKeys();
-		
-    	//client.receivePublicKeyFrom(otherClient);
-    	//otherClient.receivePublicKeyFrom(client);
-    	
-    	//client.getShared();
-    	//otherClient.getShared();
-		
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		

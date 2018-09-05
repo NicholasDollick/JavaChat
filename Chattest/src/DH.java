@@ -122,6 +122,12 @@ public class DH {
     	recievedPublicKey = person.getPublicKey();
     }
     
+    public void receivePublicKeyFrom(final PublicKey key) throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+    	recievedPublicKey = key;
+    }
+    
+    
     public byte[] getSecret() {
     	return this.secretKey;
     }
@@ -134,7 +140,8 @@ public class DH {
     	X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(this.pubKeyEnc);
     	return keyFac.generatePublic(x509KeySpec);
     }
-	
+    
+    
     /*
      * Formats and prints for debugging aid
      */

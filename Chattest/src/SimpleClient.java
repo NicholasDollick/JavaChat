@@ -11,8 +11,7 @@ import javax.swing.*;
 
 
 public class SimpleClient {
-	static String name = "QNTM v0.2";
-	//private JTextField userText;
+	static String name = "QNTM v0.3";
 	private static Socket connection;
 	private String username = "Client"; //username is received from prechat login	
 	static JFrame chatFrame = new JFrame(name);
@@ -21,7 +20,6 @@ public class SimpleClient {
 	static JButton sendMessage;
 	static JFrame preFrame;
 	DH client = new DH(); // init DH algo
-	DH otherClient = new DH();
 	static  JTextField usernameBox;
 	static  JPasswordField passwordBox;
 	static JTextField serverIPInput;
@@ -51,16 +49,7 @@ public class SimpleClient {
 	/*
 	 * Main Chat Window
 	 */
-	public  SimpleClient() throws NumberFormatException, UnknownHostException, IOException {
-		// this block is for testing only
-		//client.generateKeys();
-		//otherClient.generateKeys();
-		
-    	//client.receivePublicKeyFrom(otherClient);
-    	//otherClient.receivePublicKeyFrom(client);
-    	
-    	//client.getShared();
-    	//otherClient.getShared();
+	public SimpleClient() throws NumberFormatException, UnknownHostException, IOException, InvalidKeySpecException {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch (Exception e) {
@@ -111,8 +100,8 @@ public class SimpleClient {
 		chatFrame.setSize(600,480);
 		chatFrame.setVisible(true);
 	}
-	
-	
+
+
 	class sendMessageButtonActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			if (messageBox.getText().length() < 1) {
@@ -132,7 +121,6 @@ public class SimpleClient {
 					+ "\n");
 
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				messageBox.setText("");
