@@ -5,7 +5,7 @@ public class Servertest
 
 	public static void main(String[] args) 
 	{
-		Server test = new Server();
+		SimpleServer test = new SimpleServer();
 		
 		test.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		test.startRunning();
