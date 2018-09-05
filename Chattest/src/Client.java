@@ -6,10 +6,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.awt.event.*;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 
@@ -22,36 +18,89 @@ public class Client {
 	private ObjectInputStream input;
 	private String message = "";
 	private String serverIP;
-	private SSLSocket connection;
-	private String username = "0xFF"; //username is received from prechat login
+	private String port;
+	private Socket connection;
+	private String username; //username is received from prechat login
+	
 	JFrame chatFrame = new JFrame(name);
 	JTextField messageBox; //where the user types
 	JTextArea chatBox;
 	JButton sendMessage;
-	
+	JFrame preFrame;
 	DH client = new DH(); // init DH algo
 	DH otherClient = new DH();
+    JTextField usernameBox;
+    JPasswordField passwordBox;
+	JTextField serverIPInput;
+	JTextField portNum;
 	
 	//constructor
-	public Client(String host) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException
+	public Client() throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException
 	{
-		// this block is for testing only
-		client.generateKeys();
-		otherClient.generateKeys();
-		
-    	client.receivePublicKeyFrom(otherClient);
-    	otherClient.receivePublicKeyFrom(client);
-    	
-    	client.getShared();
-    	otherClient.getShared();
-		
 		// match UI of user desktop environment
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		serverIP = host;
+		
+    	serverIPInput = new JTextField(15);
+    	portNum = new JTextField(4);
+    	JLabel enterServerIP = new JLabel("Server IP:");
+    	JLabel port = new JLabel("Port #:");
+    	chatFrame.setVisible(false);
+    	preFrame = new JFrame(name);
+    	usernameBox = new JTextField(15);
+    	passwordBox = new JPasswordField(15);
+    	JLabel chooseUsernameLabel = new JLabel("username:");
+    	JLabel choosePassword = new JLabel("password:");
+    	JButton enterServer = new JButton("Enter Chat Server");
+    	JButton createAccount = new JButton("Create Account");
+    	enterServer.addActionListener(new enterServerButtonListener());
+    	JPanel prePanel = new JPanel(new GridBagLayout());
+    	
+    	GridBagConstraints preRight = new GridBagConstraints();
+        preRight.insets = new Insets(0, 0, 10, 10);
+        preRight.anchor = GridBagConstraints.EAST;
+        GridBagConstraints preLeft = new GridBagConstraints();
+        preLeft.anchor = GridBagConstraints.WEST;
+        preLeft.insets = new Insets(0, 10, 10, 10);
+        preRight.fill = GridBagConstraints.HORIZONTAL;
+        preRight.gridwidth = GridBagConstraints.REMAINDER;
+
+        prePanel.add(chooseUsernameLabel, preLeft);
+        prePanel.add(usernameBox, preRight);
+        //prePanel.add(choosePassword, preLeft);
+        //prePanel.add(passwordBox, preRight);
+        prePanel.add(enterServerIP, preLeft);
+        prePanel.add(serverIPInput, preRight);
+        prePanel.add(port, preLeft);
+        prePanel.add(portNum, preRight);
+        preFrame.add(prePanel, BorderLayout.CENTER);
+        preFrame.add(createAccount, BorderLayout.SOUTH);
+        preFrame.add(enterServer, BorderLayout.SOUTH);
+        preFrame.setSize(350, 350);
+        preFrame.setVisible(true);
+		
+	}
+	
+	/*
+	 * Main Chat Window
+	 */
+	public void chatWindow() throws NumberFormatException, UnknownHostException, IOException {
+		connection = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(port));
+		// this block is for testing only
+		//client.generateKeys();
+		//otherClient.generateKeys();
+		
+    	//client.receivePublicKeyFrom(otherClient);
+    	//otherClient.receivePublicKeyFrom(client);
+    	
+    	//client.getShared();
+    	//otherClient.getShared();
+		
+
+		//serverIP = host;
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		
@@ -66,19 +115,6 @@ public class Client {
 		sendMessage = new JButton("Send Message");
 		sendMessage.addActionListener(
 				new sendMessageButtonActionListener());
-		/*
-		 * old code, prob not needed
-		userText.addActionListener(
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent event)
-					{
-						sendData(event.getActionCommand());
-						userText.setText("");
-					}
-				}
-		);
-		*/
 		
 		chatBox = new JTextArea();
 		chatBox.setEditable(false);
@@ -109,14 +145,6 @@ public class Client {
 		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		chatFrame.setSize(600,480);
 		chatFrame.setVisible(true);
-		
-	}
-	
-	/*
-	 * Main Chat Window
-	 */
-	public void chatWindow() {
-		
 	}
 	
 	//connect to server
@@ -263,27 +291,9 @@ public class Client {
 			}
 			else {
 				try {
-					chatBox.append("<" + username + ">" + AES.encrypt(messageBox.getText(), client.getSecret())
+					chatBox.append("<" + username + ">" + messageBox.getText()
 							+ "\n");
-				} catch (InvalidKeyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalBlockSizeException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (BadPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidAlgorithmParameterException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -293,14 +303,28 @@ public class Client {
 		}
 	}
 	
-	class enterServeButtonListener implements ActionListener {
+	class enterServerButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
-			username = null; //usernameBox.getText();
+			username = usernameBox.getText();
 			if (username.length() < 1) {
 				System.out.println("Please Enter Username!");
 			}
 			else {
-				
+				preFrame.setVisible(false);
+				serverIP = serverIPInput.getText();
+				port = portNum.getText();
+				try {
+					chatWindow();
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
