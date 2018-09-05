@@ -21,6 +21,7 @@ public class Client {
 	private String port;
 	private Socket connection;
 	private String username; //username is received from prechat login
+	private BufferedReader bufferIn;
 	
 	JFrame chatFrame = new JFrame(name);
 	JTextField messageBox; //where the user types
@@ -91,6 +92,7 @@ public class Client {
 		connection = new Socket(InetAddress.getByName(serverIP), Integer.valueOf(port));
 		input = connection.getInputStream();
 		output = connection.getOutputStream();
+		bufferIn = new BufferedReader(new InputStreamReader(input));
 		// this block is for testing only
 		//client.generateKeys();
 		//otherClient.generateKeys();
@@ -144,8 +146,27 @@ public class Client {
 		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		chatFrame.setSize(600,480);
 		chatFrame.setVisible(true);
+		
+		Thread chat = new Thread() {
+			public void run() {
+				do{
+					try{
+						message = bufferIn.readLine();
+						showMessage("\n" + message);
+						
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+					
+				}while(!message.equals("CLOSE"));
+			}
+		};
 	}
 	
+	public void onMessage(String message) {
+		String line = message;
+		chatBox.append(line);
+	}
 	//connect to server
 	public void startRunning()
 	{
@@ -197,22 +218,6 @@ public class Client {
 	}
 	
 	//while chatting with server
-	private void whileChatting() throws IOException
-	{
-		ableToType(true);
-		do{
-			try{
-				message = (String) input.readObject();
-				showMessage("\n" + message);
-				
-			}catch(ClassNotFoundException classNotFoundException){
-				showMessage("\n This really should never be displayed \n");
-			}
-			
-		}while(!message.equals("SERVER - END"));
-	}
-	
-	//while chatting with server
 	private void whileChatting(String username) throws IOException
 	{
 		ableToType(true);
@@ -259,6 +264,7 @@ public class Client {
 	//updates chatWindow
 	private void showMessage(final String text)
 	{
+		chatWindow.append(text);
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				chatWindow.append(text);
@@ -279,6 +285,35 @@ public class Client {
 		
 	}
 	
+	private void messageReader() {
+		Thread t = new Thread(){
+			public void run() {
+				readMessageLoop();
+			}
+		};
+	}
+	
+	private void readMessageLoop() {
+		String line;
+		try {
+			while((line = bufferIn.readLine()) != null) {
+				
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			try {
+				connection.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	private void message(String sendTo, String message) throws IOException {
+		String cmd = "msg " + sendTo + " " + message + "\n";
+		output.write(cmd.getBytes());
+	}
+	
 	class sendMessageButtonActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			if (messageBox.getText().length() < 1) {
@@ -292,6 +327,7 @@ public class Client {
 				try {
 					output.write(("<" + username + ">" + messageBox.getText()
 							+ "\n").getBytes());
+					output.flush();
 					chatBox.append("<" + username + ">" + messageBox.getText()
 							+ "\n");
 				} catch (Exception e) {
