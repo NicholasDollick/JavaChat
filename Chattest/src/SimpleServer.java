@@ -52,10 +52,51 @@ public class SimpleServer
 		}
 	}
 	
+    public void display() {
+    	JTextField serverIP = new JTextField(15);
+    	JTextField portNum = new JTextField(4);
+    	JLabel enterServerIP = new JLabel("Server IP:");
+    	JLabel port = new JLabel("Port #:");
+    	chatFrame.setVisible(false);
+    	preFrame = new JFrame(name);
+    	usernameBox = new JTextField(15);
+    	passwordBox = new JPasswordField(15);
+    	JLabel chooseUsernameLabel = new JLabel("username:");
+    	JLabel choosePassword = new JLabel("password:");
+    	JButton enterServer = new JButton("Enter Chat Server");
+    	JButton createAccount = new JButton("Create Account");
+    	enterServer.addActionListener(
+    			new enterServerButtonListener());
+    	JPanel prePanel = new JPanel(new GridBagLayout());
+    	
+    	GridBagConstraints preRight = new GridBagConstraints();
+        preRight.insets = new Insets(0, 0, 10, 10);
+        preRight.anchor = GridBagConstraints.EAST;
+        GridBagConstraints preLeft = new GridBagConstraints();
+        preLeft.anchor = GridBagConstraints.WEST;
+        preLeft.insets = new Insets(0, 10, 10, 10);
+        preRight.fill = GridBagConstraints.HORIZONTAL;
+        preRight.gridwidth = GridBagConstraints.REMAINDER;
+
+        prePanel.add(chooseUsernameLabel, preLeft);
+        prePanel.add(usernameBox, preRight);
+        //prePanel.add(choosePassword, preLeft);
+        //prePanel.add(passwordBox, preRight);
+        prePanel.add(enterServerIP, preLeft);
+        prePanel.add(serverIP, preRight);
+        prePanel.add(port, preLeft);
+        prePanel.add(portNum, preRight);
+        preFrame.add(prePanel, BorderLayout.CENTER);
+        preFrame.add(createAccount, BorderLayout.SOUTH);
+        preFrame.add(enterServer, BorderLayout.SOUTH);
+        preFrame.setSize(350, 350);
+        preFrame.setVisible(true);
+    }
+	
 	/*
 	 * Main Chat Window
 	 */
-	public SimpleServer() throws NumberFormatException, UnknownHostException, IOException {
+	public void SimpleServer() throws NumberFormatException, UnknownHostException, IOException {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		
@@ -135,6 +176,23 @@ public class SimpleServer
 			}
 			messageBox.requestFocusInWindow();
 		}
+	}
+		
+	    class enterServerButtonListener implements ActionListener {
+	        public void actionPerformed(ActionEvent event) {
+	            username = usernameBox.getText();
+	            if (username.length() < 1) {
+	                System.out.println("No!");
+	            } else {
+	                preFrame.setVisible(false);
+	                try {
+						display();
+					} catch (NumberFormatException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+	            }
+	        }
 	}
 
 }

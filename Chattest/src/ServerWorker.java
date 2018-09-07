@@ -1,4 +1,6 @@
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,17 +27,23 @@ public class ServerWorker extends Thread {
 	
 	private void handleClientSocket() throws IOException, InterruptedException {
 		//ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
-		OutputStream outputStream = clientSocket.getOutputStream();
-		InputStream inputStream = clientSocket.getInputStream();
+		DataOutputStream outputStream = new DataOutputStream(clientSocket.getOutputStream());
+		DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
 		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-		String line;
-		while((line = reader.readLine()) != null) {
-			if ("quit".equalsIgnoreCase(line)) {
+		//BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		
+		
+		String msgIn = "";
+		
+		while(!msgIn.equals("CLOSE")) {
+			if ("quit".equalsIgnoreCase(msgIn)) {
 				break;
 			}
-			String msg = line + "\n";
-			outputStream.write(msg.getBytes());
+			else {
+				String msg = msgIn + "\n";
+				outputStream.write(msg.getBytes());
+				outputStream.flush();
+			}
 		}
 		
 		clientSocket.close();
