@@ -1,6 +1,9 @@
 import java.io.*;
 import java.awt.*;
 import java.net.*;
+import java.security.Key;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.awt.event.*;
 
 import javax.net.ssl.SSLServerSocket;
@@ -8,10 +11,11 @@ import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 
 
+
 public class SimpleServer
 {
 	static String name = "QNTM v0.3";
-	private String username = "Server"; //username is received from prechat login
+	private String username = ""; //username is received from prechat login
 	static JFrame chatFrame = new JFrame(name);
 	static JTextField messageBox; //where the user types
 	static JTextArea chatBox;
@@ -36,9 +40,9 @@ public class SimpleServer
 			System.out.println("Waiting for client...");			
 			connection = server.accept();
 			System.out.println("Accepted connection from: " + connection);
-			SimpleServer serv = new SimpleServer();
 			din = new DataInputStream(connection.getInputStream());
 			dout = new DataOutputStream(connection.getOutputStream());
+			SimpleServer serv = new SimpleServer();
 			
 			String messageIn = "", messageOut = "";
 			
@@ -52,6 +56,53 @@ public class SimpleServer
 		}
 	}
 	
+	private void setup() {
+		JTextField serverIP = new JTextField(15);
+    	JTextField portNum = new JTextField(4);
+    	JLabel enterServerIP = new JLabel("Server IP:");
+    	JLabel port = new JLabel("Port #:");
+    	chatFrame.setVisible(false);
+    	preFrame = new JFrame(name);
+    	usernameBox = new JTextField(15);
+    	passwordBox = new JPasswordField(15);
+    	JLabel chooseUsernameLabel = new JLabel("username:");
+    	JLabel choosePassword = new JLabel("password:");
+    	JButton enterServer = new JButton("Enter Chat Server");
+    	JButton createAccount = new JButton("Create Account");
+    	enterServer.addActionListener(new enterServerButtonListener());
+    	JPanel prePanel = new JPanel(new GridBagLayout());
+    	
+    	GridBagConstraints preRight = new GridBagConstraints();
+        preRight.insets = new Insets(0, 0, 10, 10);
+        preRight.anchor = GridBagConstraints.EAST;
+        GridBagConstraints preLeft = new GridBagConstraints();
+        preLeft.anchor = GridBagConstraints.WEST;
+        preLeft.insets = new Insets(0, 10, 10, 10);
+        preRight.fill = GridBagConstraints.HORIZONTAL;
+        preRight.gridwidth = GridBagConstraints.REMAINDER;
+
+        prePanel.add(chooseUsernameLabel, preLeft);
+        prePanel.add(usernameBox, preRight);
+        //prePanel.add(choosePassword, preLeft);
+        //prePanel.add(passwordBox, preRight);
+        //prePanel.add(enterServerIP, preLeft);
+        //prePanel.add(serverIP, preRight);
+        //prePanel.add(port, preLeft);
+        //prePanel.add(portNum, preRight);
+        preFrame.add(prePanel, BorderLayout.CENTER);
+        preFrame.add(createAccount, BorderLayout.SOUTH);
+        preFrame.add(enterServer, BorderLayout.SOUTH);
+        preFrame.setSize(350, 350);
+        preFrame.setVisible(true);
+	}
+	
+	@SuppressWarnings("unused")
+	private void sendKey(PublicKey key) throws IOException {
+		
+		//dout.writeUTF(Base64.getEncoder().encodeToString(key));
+		//dout.flush();
+	}
+	
 	/*
 	 * Main Chat Window
 	 */
@@ -62,6 +113,48 @@ public class SimpleServer
 			e.printStackTrace();
 		}
 		
+		JTextField serverIP = new JTextField(15);
+    	JTextField portNum = new JTextField(4);
+    	JLabel enterServerIP = new JLabel("Server IP:");
+    	JLabel port = new JLabel("Port #:");
+    	chatFrame.setVisible(false);
+    	preFrame = new JFrame(name);
+    	usernameBox = new JTextField(15);
+    	passwordBox = new JPasswordField(15);
+    	JLabel chooseUsernameLabel = new JLabel("username:");
+    	JLabel choosePassword = new JLabel("password:");
+    	JButton enterServer = new JButton("Enter Chat Server");
+    	JButton createAccount = new JButton("Create Account");
+    	enterServer.addActionListener(new enterServerButtonListener());
+    	JPanel prePanel = new JPanel(new GridBagLayout());
+    	
+    	GridBagConstraints preRight = new GridBagConstraints();
+        preRight.insets = new Insets(0, 0, 10, 10);
+        preRight.anchor = GridBagConstraints.EAST;
+        GridBagConstraints preLeft = new GridBagConstraints();
+        preLeft.anchor = GridBagConstraints.WEST;
+        preLeft.insets = new Insets(0, 10, 10, 10);
+        preRight.fill = GridBagConstraints.HORIZONTAL;
+        preRight.gridwidth = GridBagConstraints.REMAINDER;
+
+        prePanel.add(chooseUsernameLabel, preLeft);
+        prePanel.add(usernameBox, preRight);
+        //prePanel.add(choosePassword, preLeft);
+        //prePanel.add(passwordBox, preRight);
+        //prePanel.add(enterServerIP, preLeft);
+        //prePanel.add(serverIP, preRight);
+        //prePanel.add(port, preLeft);
+        //prePanel.add(portNum, preRight);
+        preFrame.add(prePanel, BorderLayout.CENTER);
+        preFrame.add(createAccount, BorderLayout.SOUTH);
+        preFrame.add(enterServer, BorderLayout.SOUTH);
+        preFrame.setSize(350, 350);
+        preFrame.setVisible(true);
+				
+
+	}
+	
+	public void displayChat() {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		
@@ -142,5 +235,18 @@ public class SimpleServer
 			messageBox.requestFocusInWindow();
 		}
 	}
+	
+    class enterServerButtonListener implements ActionListener {
+        public void actionPerformed(ActionEvent event) {
+            username = usernameBox.getText();
+            if (username.length() < 1) {
+                System.out.println("No!");
+            } else {
+                preFrame.setVisible(false);
+                displayChat();
+            }
+        }
+
+    }
 
 }
