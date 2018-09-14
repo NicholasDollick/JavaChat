@@ -123,9 +123,10 @@ public class DH {
     	recievedPublicKey = person.getPublicKey();
     }
     
-    public void receivePublicKeyFrom(final PublicKey key) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public void receivePublicKey(final byte[] key) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
-    	recievedPublicKey = key;
+    	PublicKey pubKey = KeyFactory.getInstance(TAG).generatePublic(new X509EncodedKeySpec(key));
+    	recievedPublicKey = pubKey;
     }
     
     
@@ -142,14 +143,25 @@ public class DH {
     	return keyFac.generatePublic(x509KeySpec);
     }
     
+    /*
+     * Generates public key from passed serialized key
+     */
+    public byte[] getPublicKeyEnc() throws InvalidKeySpecException, NoSuchAlgorithmException {
+    	KeyFactory keyFac = KeyFactory.getInstance("DH");
+    	X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(this.pubKeyEnc);
+    	
+    	return x509KeySpec.getEncoded();
+    }
+    
     
     /*
      * Formats and prints for debugging aid
      */
-	public void printKeys() {
+	public void printKeys() throws InvalidKeySpecException, NoSuchAlgorithmException {
 		System.out.println("\n[+] Listing Key");
 		System.out.println("Shared Key = " + this.secretKey + ", length = " + this.secretKey.length);
 		System.out.println(toHexString(this.secretKey));
+		System.out.println(toHexString(this.pubKeyEnc));
 	}
 	
     /*
@@ -200,8 +212,14 @@ public class DH {
     	/*
     	 * clients swap keys
     	 */
-    	alice.receivePublicKeyFrom(bob);
-    	bob.receivePublicKeyFrom(alice);
+    	//alice.receivePublicKeyFrom(bob);
+    	//bob.receivePublicKeyFrom(alice);
+    	
+    	/*
+    	 * clients swap keys
+    	 */
+    	alice.receivePublicKey(bob.getPublicKeyEnc());
+    	bob.receivePublicKey(alice.getPublicKeyEnc());
     	
     	/*
     	 *  clients generate shared secret
