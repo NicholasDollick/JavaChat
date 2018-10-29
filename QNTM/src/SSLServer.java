@@ -7,10 +7,9 @@ import java.awt.event.*;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 import javax.swing.*;
 
-public class ClientTest
+public class SSLServer
 {
 	//private static ServerSocket server;
 	//private static Socket connection;
@@ -20,12 +19,13 @@ public class ClientTest
 	public static void main(String [] args) throws InterruptedException {
 		int port = 2423;
 		//configure ssl
-		System.setProperty("javax.net.ssl.trustStore", "myTrustStore.jts");
-		System.setProperty("javax.net.ssl.trustStorePassword", "asdf123");
+		System.setProperty("javax.net.ssl.keyStore", "myKeyStore.jks");
+		System.setProperty("javax.net.ssl.keyStorePassword", "asdf123");
 		System.setProperty("javax.net.debug", "ssl");
 		try {
-			SSLSocketFactory sockFact = (SSLSocketFactory)SSLSocketFactory.getDefault();
-			SSLSocket sslSocket = (SSLSocket)sockFact.createSocket("localhost",port); //something about inet addy might be neded
+			SSLServerSocketFactory serverSockFact = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
+			System.out.println("{*} Starting Server");
+			SSLServerSocket serverSocket = (SSLServerSocket)serverSockFact.createServerSocket(port); //something about inet addy might be neded
 			SSLSocket sslConnection = (SSLSocket) serverSocket.accept();
 			System.out.println("Accepted connection from: " + sslConnection);
 			DataOutputStream outputStream = new DataOutputStream(sslConnection.getOutputStream());
