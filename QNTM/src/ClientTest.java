@@ -27,7 +27,7 @@ public class ClientTest
 			//small test of DH key exchange
 			try {
 				//generate keys
-				System.out.println("{+} Starting key exchange");
+				System.out.println("{*} Starting key exchange");
 				dh.generateKeys();
 				System.out.println("{*} Waiting for Key");
 				int len = inputStream.readInt();
@@ -53,12 +53,34 @@ public class ClientTest
 				e.printStackTrace();
 			}
 			
+			System.out.println();
+			System.out.println("{+} Communication now encrypted");
+			System.out.println("{*} Beginning test with server echo...");
+			System.out.println();
 			
 			while(true) {
 				System.out.print("Write a message: ");
 				String out = System.console().readLine();
-				outputStream.writeUTF(out);
-				System.err.println(inputStream.readUTF());
+				
+				byte[] messageOut = AES.encrypt(out, dh.getSecret());
+				int len = messageOut.length;
+				outputStream.writeInt(len);
+				outputStream.write(messageOut);
+				
+				
+				
+				int readInLen = inputStream.readInt();
+				byte[] readIn;
+				String message = "";
+				
+				if(readInLen > 0)
+				{
+					readIn = new byte[readInLen];
+					inputStream.readFully(readIn, 0, readInLen);
+					message = AES.decrypt(readIn, dh.getSecret());
+				}
+				System.out.println(message);
+				
 				if(out.equals("CLOSE")) {
 					break;
 				}				
@@ -71,7 +93,7 @@ public class ClientTest
 				worker.start();
 			}
 			*/
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

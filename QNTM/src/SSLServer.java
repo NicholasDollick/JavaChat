@@ -66,18 +66,33 @@ public class SSLServer
 			
 
 			while(true) {
-				String in = inputStream.readUTF();
-				System.out.println("client said: " + in);
-				if(in.equals("CLOSE")) {
-					outputStream.writeUTF("Thank you for chatting!");
+				int readInLen = inputStream.readInt();
+				byte[] readIn;
+				String message = "";
+				
+				if(readInLen > 0)
+				{
+					readIn = new byte[readInLen];
+					inputStream.readFully(readIn, 0, readInLen);
+					System.out.println(keyTest.toHexString(readIn));
+					message = AES.decrypt(readIn, keyTest.getSecret());
+				}
+
+				System.out.println("client said: " + message);
+				if(message.equals("CLOSE")) {
+					//outputStream.writeUTF("Thank you for chatting!"); //this needs to be changed
 					outputStream.close();
 					inputStream.close();
 					sslConnection.close();
 					System.out.println("{*} Server shutting down");
 					serverSocket.close();
 				}
-				else
-					outputStream.writeUTF("you said: " + in);
+				else {
+					byte[] messageOut = AES.encrypt("Server thinks you said: " + message, keyTest.getSecret());
+					int len = messageOut.length;
+					outputStream.writeInt(len);
+					outputStream.write(messageOut);
+				}
 			}
 			/*
 			while(true) {
@@ -87,7 +102,7 @@ public class SSLServer
 				worker.start();
 			}
 			*/
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		System.out.println("{+} Server shut down");
