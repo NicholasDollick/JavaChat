@@ -26,25 +26,17 @@ public class ClientTest
 		try {
 			SSLSocketFactory sockFact = (SSLSocketFactory)SSLSocketFactory.getDefault();
 			SSLSocket sslSocket = (SSLSocket)sockFact.createSocket("localhost",port); //something about inet addy might be neded
-			SSLSocket sslConnection = (SSLSocket) serverSocket.accept();
-			System.out.println("Accepted connection from: " + sslConnection);
-			DataOutputStream outputStream = new DataOutputStream(sslConnection.getOutputStream());
-			DataInputStream inputStream = new DataInputStream(sslConnection.getInputStream());
+			DataOutputStream outputStream = new DataOutputStream(sslSocket.getOutputStream());
+			DataInputStream inputStream = new DataInputStream(sslSocket.getInputStream());
+			System.out.println(inputStream.readUTF());
 			while(true) {
-				String in = inputStream.readUTF();
-				System.out.println("client said: " + in);
-				if(in.equals("CLOSE")) {
-					outputStream.writeUTF("Thank you for chatting!");
-					outputStream.close();
-					inputStream.close();
-					sslConnection.close();
-					System.out.println("{*} Server shutting down");
-					serverSocket.close();
-				}
-				else
-					outputStream.writeUTF("you said: " + in);
-				
-				
+				System.out.print("Write a message: ");
+				String out = System.console().readLine();
+				outputStream.writeUTF(out);
+				System.err.println(inputStream.readUTF());
+				if(out.equals("CLOSE")) {
+					break;
+				}				
 			}
 			/*
 			while(true) {

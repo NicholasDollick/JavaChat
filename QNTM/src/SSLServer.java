@@ -11,13 +11,10 @@ import javax.swing.*;
 
 public class SSLServer
 {
-	//private static ServerSocket server;
-	//private static Socket connection;
-	
-	
 	//constructor
 	public static void main(String [] args) throws InterruptedException {
 		int port = 2423;
+		
 		//configure ssl
 		System.setProperty("javax.net.ssl.keyStore", "myKeyStore.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", "asdf123");
@@ -30,6 +27,7 @@ public class SSLServer
 			System.out.println("Accepted connection from: " + sslConnection);
 			DataOutputStream outputStream = new DataOutputStream(sslConnection.getOutputStream());
 			DataInputStream inputStream = new DataInputStream(sslConnection.getInputStream());
+			outputStream.writeUTF("Thank You For Using QNTM!");
 			while(true) {
 				String in = inputStream.readUTF();
 				System.out.println("client said: " + in);
@@ -43,8 +41,6 @@ public class SSLServer
 				}
 				else
 					outputStream.writeUTF("you said: " + in);
-				
-				
 			}
 			/*
 			while(true) {
@@ -57,5 +53,6 @@ public class SSLServer
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("{+} Server shut down");
 	}
 }
