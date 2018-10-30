@@ -179,7 +179,7 @@ public class DH {
     /*
      * Converts a byte array to hex string
      */
-    private String toHexString(byte[] block) {
+    public String toHexString(byte[] block) {
         StringBuffer buf = new StringBuffer();
         int len = block.length;
         for (int i = 0; i < len; i++) {
@@ -232,6 +232,7 @@ public class DH {
     	 */
     	bob.printKeys();
     	alice.printKeys();
+
     	
     	String message = "This is a test of DH + AES";
     	byte[] test = AES.encrypt(message, bob.getSecret());
