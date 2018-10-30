@@ -3,7 +3,7 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
-public class SSLServer
+public class SSLMultiClientServer
 {
 	//constructor
 	public static void main(String [] args) throws InterruptedException {
@@ -14,11 +14,13 @@ public class SSLServer
 		System.setProperty("javax.net.ssl.keyStore", "myKeyStore.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", "asdf123");
 		
-		System.setProperty("javax.net.debug", "ssl");
+		//System.setProperty("javax.net.debug", "ssl");
 		try {
 			SSLServerSocketFactory serverSockFact = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 			System.out.println("{*} Starting Server");
 			SSLServerSocket serverSocket = (SSLServerSocket)serverSockFact.createServerSocket(port); //something about inet addy might be neded
+			
+			/*
 			SSLSocket sslConnection = (SSLSocket) serverSocket.accept();
 			System.out.println("Accepted connection from: " + sslConnection);
 			DataOutputStream outputStream = new DataOutputStream(sslConnection.getOutputStream());
@@ -61,7 +63,7 @@ public class SSLServer
 				e.printStackTrace();
 			} 
 			
-
+			
 			while(true) {
 				int readInLen = inputStream.readInt();
 				byte[] readIn;
@@ -90,15 +92,16 @@ public class SSLServer
 					outputStream.writeInt(len);
 					outputStream.write(messageOut);
 				}
-			}
-			/*
+			} */
+			
 			while(true) {
 				System.out.println("Waiting for client...");
-				System.out.println("Accepted connection from: " + connection);
-				ServerWorker worker = new ServerWorker(connection);
+				SSLSocket sslConnection = (SSLSocket) serverSocket.accept();
+				System.out.println("Accepted connection from: " + sslConnection);
+				SSLServerWorker worker = new SSLServerWorker(sslConnection);
 				worker.start();
 			}
-			*/
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

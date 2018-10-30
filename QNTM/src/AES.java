@@ -45,7 +45,7 @@ public class AES {
 		final byte[] concat = concat(iv, encryptedData); // not super graceful. should be just done on return line.
 														 // this will be fixed after proper testing
 		
-		System.out.println(concat + " concat length: " + concat.length);
+		//System.out.println(concat + " concat length: " + concat.length);
 		
 		return concat;
 	}

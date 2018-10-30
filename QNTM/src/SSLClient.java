@@ -1,33 +1,36 @@
 import java.io.*;
 import java.awt.*;
 import java.net.*;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.awt.event.*;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.swing.*;
 
-
-public class SimpleClient {
-	static String name = "QNTM v0.3";
-	private static Socket connection;
+public class SSLClient
+{
+	static String name = "QNTM v0.4";
 	private String username = "Client"; //username is received from prechat login	
 	static JFrame chatFrame = new JFrame(name);
 	static JTextField messageBox; //where the user types
 	static JTextArea chatBox;
 	static JButton sendMessage;
 	static JFrame preFrame;
-	DH client = new DH(); // init DH algo
-	static  JTextField usernameBox;
-	static  JPasswordField passwordBox;
+	static JTextField usernameBox;
+	static JPasswordField passwordBox;
 	static JTextField serverIPInput;
 	static JTextField portNum;
+	static DataInputStream inputStream;
+	static DataOutputStream outputStream;
+	static DH dh = new DH();
 	
-	static DataInputStream din;
-	static DataOutputStream dout;
-	Action messageSend = new AbstractAction() {
+	// generic listener for both send button and enter key
+	Action sendMessageAction = new AbstractAction() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (messageBox.getText().length() < 1) {
@@ -38,13 +41,15 @@ public class SimpleClient {
 				messageBox.setText("");
 			}
 			else {
+				// sending message
 				try {
-					dout.writeUTF("<" + username + ">" + messageBox.getText()
-					+ "\n");
-					dout.flush();
-					
-					chatBox.append("<" + username + ">" + messageBox.getText()
-					+ "\n");
+					String out = messageBox.getText();
+					byte[] messageOut = AES.encrypt("<" + username + ">"
+							+ out, dh.getSecret());
+					int len = messageOut.length;
+					outputStream.writeInt(len);
+					outputStream.write(messageOut);
+					chatBox.append("<" + username + ">" + out + "\n");
 
 				} catch (Exception e2) {
 					e2.printStackTrace();
@@ -55,29 +60,26 @@ public class SimpleClient {
 		}
 	};
 	
+	// generic action for joining server with button or enter key
+	Action enterServerAction = new AbstractAction() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2L;
 
-	public static void main(String[] args) {
-		try {
-			connection = new Socket(InetAddress.getByName("localhost"), 2423);
-			din = new DataInputStream(connection.getInputStream());
-			dout = new DataOutputStream(connection.getOutputStream());
-			SimpleClient test = new SimpleClient();
-			String messageIn = "", messageOut = "";
-			
-			while(!messageIn.equals("CLOSE")) {
-				messageIn = din.readUTF();
-				chatBox.append(messageIn);
-			}
-			
-		} catch(Exception e) {
-			e.printStackTrace();
+		@Override
+		public void actionPerformed(ActionEvent e) {
+            username = usernameBox.getText();
+            if (username.length() < 1) {
+                System.out.println("No!");
+            } else {
+                preFrame.setVisible(false);
+                displayChat();
+            }
 		}
-	}
-
-	/*
-	 * Main Chat Window
-	 */
-	public SimpleClient() throws NumberFormatException, UnknownHostException, IOException, InvalidKeySpecException {
+	};
+	
+	public SSLClient() throws NumberFormatException, UnknownHostException, IOException, InvalidKeySpecException {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch (Exception e) {
@@ -91,12 +93,13 @@ public class SimpleClient {
     	chatFrame.setVisible(false);
     	preFrame = new JFrame(name);
     	usernameBox = new JTextField(15);
+    	usernameBox.addActionListener( enterServerAction );
     	passwordBox = new JPasswordField(15);
     	JLabel chooseUsernameLabel = new JLabel("username:");
     	JLabel choosePassword = new JLabel("password:");
     	JButton enterServer = new JButton("Enter Chat Server");
     	JButton createAccount = new JButton("Create Account");
-    	enterServer.addActionListener(new enterServerButtonListener());
+    	enterServer.addActionListener( enterServerAction );
     	JPanel prePanel = new JPanel(new GridBagLayout());
     	
     	GridBagConstraints preRight = new GridBagConstraints();
@@ -122,7 +125,7 @@ public class SimpleClient {
         preFrame.setSize(350, 350);
         preFrame.setVisible(true);
 	}
-	
+
 	public void displayChat() {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
@@ -133,10 +136,10 @@ public class SimpleClient {
 		
 		messageBox = new JTextField(30);
 		messageBox.requestFocusInWindow();
-		messageBox.addActionListener( messageSend );
+		messageBox.addActionListener( sendMessageAction );
 		
 		sendMessage = new JButton("Send Message");
-		sendMessage.addActionListener( messageSend );
+		sendMessage.addActionListener( sendMessageAction );
 		
 		chatBox = new JTextArea();
 		chatBox.setEditable(false);
@@ -168,18 +171,73 @@ public class SimpleClient {
 		chatFrame.setSize(600,480);
 		chatFrame.setVisible(true);
 	}
-
-    class enterServerButtonListener implements ActionListener {
-        public void actionPerformed(ActionEvent event) {
-            username = usernameBox.getText();
-            if (username.length() < 1) {
-                System.out.println("No!");
-            } else {
-                preFrame.setVisible(false);
-                displayChat();
-            }
-        }
-
-    }
 	
+	
+	public static void main(String [] args) throws InterruptedException {
+		int port = 2423;
+		
+		//configure ssl
+		System.setProperty("javax.net.ssl.trustStore", "myTrustStore.jts");
+		System.setProperty("javax.net.ssl.trustStorePassword", "asdf123");
+		//System.setProperty("javax.net.debug", "ssl");
+		try {
+			SSLSocketFactory sockFact = (SSLSocketFactory)SSLSocketFactory.getDefault();
+			SSLSocket sslSocket = (SSLSocket)sockFact.createSocket("localhost",port); //something about inet addy might be neded
+			outputStream = new DataOutputStream(sslSocket.getOutputStream());
+			inputStream = new DataInputStream(sslSocket.getInputStream());
+			
+			// DH key exchange for message encryption
+			try {
+				//generate keys
+				System.out.println("{*} Starting key exchange");
+				dh.generateKeys();
+				System.out.println("{*} Waiting for Key");
+				int len = inputStream.readInt();
+				if(len > 0) {
+					byte[] m = new byte[len];
+					inputStream.readFully(m, 0, m.length);
+					dh.receivePublicKey(m);
+				}
+				System.out.println("{+} Key Recieved");
+				
+				
+				
+				System.out.println("{*} Sending Key");
+				byte[] pubKey = dh.getPublicKeyEnc();
+				len = pubKey.length;
+				outputStream.writeInt(len);
+				outputStream.write(pubKey);
+				System.out.println("{+} Key Sent");
+				
+				dh.getShared();
+				System.out.println(dh.getSecret());
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			System.out.println();
+			System.out.println("{+} Communication now encrypted");
+			System.out.println();
+			
+			// generate instance of client UI
+			SSLClient test = new SSLClient();
+			
+			while(true) {
+				int readInLen = inputStream.readInt();
+				byte[] readIn;
+				String message = "";
+				
+				if(readInLen > 0)
+				{
+					readIn = new byte[readInLen];
+					inputStream.readFully(readIn, 0, readInLen);
+					message = AES.decrypt(readIn, dh.getSecret());
+				}
+				chatBox.append(message + "\n");
+							
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
