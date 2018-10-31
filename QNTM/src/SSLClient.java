@@ -9,20 +9,20 @@ import javax.swing.*;
 
 public class SSLClient
 {
-	static String name = "QNTM v0.4";
+	private static String name = "QNTM v0.4";
 	private String username = "Client"; //username is received from prechat login	
-	static JFrame chatFrame = new JFrame(name);
-	static JTextField messageBox; //where the user types
-	static JTextArea chatBox;
-	static JButton sendMessage;
-	static JFrame preFrame;
-	static JTextField usernameBox;
-	static JPasswordField passwordBox;
-	static JTextField serverIPInput;
-	static JTextField portNum;
-	static DataInputStream inputStream;
-	static DataOutputStream outputStream;
-	static DH dh = new DH();
+	private static JFrame chatFrame = new JFrame(name);
+	private static JTextField messageBox; //where the user types
+	private static JTextArea chatBox;
+	private static JButton sendMessage;
+	private static JFrame preFrame;
+	private static JTextField usernameBox;
+	private static JPasswordField passwordBox;
+	private static JTextField serverIPInput;
+	private static JTextField portNum;
+	private static DataInputStream inputStream;
+	private static DataOutputStream outputStream;
+	private static DH dh = new DH();
 	
 	// generic listener for both send button and enter key
 	Action sendMessageAction = new AbstractAction() {
@@ -186,6 +186,7 @@ public class SSLClient
 			outputStream = new DataOutputStream(sslSocket.getOutputStream());
 			inputStream = new DataInputStream(sslSocket.getInputStream());
 			
+			
 			// DH key exchange for message encryption
 			try {
 				//generate keys
@@ -218,6 +219,7 @@ public class SSLClient
 			System.out.println();
 			System.out.println("{+} Communication now encrypted");
 			System.out.println();
+			
 			
 			// generate instance of client UI
 			SSLClient test = new SSLClient();
