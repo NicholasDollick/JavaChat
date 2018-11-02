@@ -110,7 +110,6 @@ public class SSLClientHandler extends Thread {
 				List<SSLClientHandler> clientList = server.getClients();
 				for(SSLClientHandler client : clientList)
 					client.sendMessage(message);
-				
 			}
 		}
 	

@@ -125,6 +125,7 @@ public class InitialLayout{
         newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         newFrame.setSize(470, 300);
         newFrame.setVisible(true);
+        
     }
     
     // this should encrypt and then send message off to server

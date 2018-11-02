@@ -10,7 +10,7 @@ import javax.swing.*;
 public class ClientTest
 {
 	private static String name = "QNTM v0.4";
-	private String username = "Client"; //username is received from prechat login	
+	private String username = ""; //username is received from prechat login	
 	private static JFrame chatFrame = new JFrame(name);
 	private static JTextField messageBox; //where the user types
 	private static JTextArea chatBox;
@@ -22,7 +22,10 @@ public class ClientTest
 	private static JTextField portNum;
 	private static DataInputStream inputStream;
 	private static DataOutputStream outputStream;
+	private static int serverPort = 0;
 	private static DH dh = new DH();
+	private static FreshClient client;
+	private static boolean isChatting = false;
 	
 	// generic listener for both send button and enter key
 	Action sendMessageAction = new AbstractAction() {
@@ -36,7 +39,7 @@ public class ClientTest
 			if (messageBox.getText().length() < 1) {
 				//empty message, do nothing
 			}
-			else if (messageBox.getText().equals(".clear")) {
+			else if (messageBox.getText().equals("!clear")) {
 				chatBox.setText("All messages cleared\n");
 				messageBox.setText("");
 			}
@@ -47,8 +50,8 @@ public class ClientTest
 					//byte[] messageOut = AES.encrypt("<" + username + ">"
 						//	+ out, dh.getSecret());
 					String messageOut = ("<" + username + ">" + out);
-					outputStream.writeUTF(messageOut);
-					//chatBox.append("<" + username + ">" + out + "\n");
+					client.sendMessageUTF(messageOut);
+					//chatBox.append(messageOut);
 
 				} catch (Exception e2) {
 					e2.printStackTrace();
@@ -69,16 +72,25 @@ public class ClientTest
 		@Override
 		public void actionPerformed(ActionEvent e) {
             username = usernameBox.getText();
+            System.out.println(portNum.getText()); //makre sure this is actually an int before trying
+            if(portNum.getText().equals(""))
+            	System.out.println("NO");
+            else
+            	serverPort = Integer.valueOf(portNum.getText());
             if (username.length() < 1) {
                 System.out.println("No!");
+            } else if(serverPort == 0) {
+            	System.out.println("Wrong");
             } else {
                 preFrame.setVisible(false);
+                client = new FreshClient(serverPort, username);
+                client.run();
                 displayChat();
             }
 		}
 	};
 	
-	public ClientTest() throws NumberFormatException, UnknownHostException, IOException, InvalidKeySpecException {
+	public void preDisplay() throws NumberFormatException, UnknownHostException, IOException, InvalidKeySpecException {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch (Exception e) {
@@ -86,10 +98,11 @@ public class ClientTest
 		}
 		
 		JTextField serverIP = new JTextField(15);
-    	JTextField portNum = new JTextField(4);
+    	portNum = new JTextField(4);
     	JLabel enterServerIP = new JLabel("Server IP:");
     	JLabel port = new JLabel("Port #:");
     	chatFrame.setVisible(false);
+    	portNum.addActionListener(enterServerAction);
     	preFrame = new JFrame(name);
     	usernameBox = new JTextField(15);
     	usernameBox.addActionListener( enterServerAction );
@@ -116,8 +129,8 @@ public class ClientTest
         //prePanel.add(passwordBox, preRight);
         //prePanel.add(enterServerIP, preLeft);
         //prePanel.add(serverIP, preRight);
-        //prePanel.add(port, preLeft);
-        //prePanel.add(portNum, preRight);
+        prePanel.add(port, preLeft);
+        prePanel.add(portNum, preRight);
         preFrame.add(prePanel, BorderLayout.CENTER);
         preFrame.add(createAccount, BorderLayout.SOUTH);
         preFrame.add(enterServer, BorderLayout.SOUTH);
@@ -169,10 +182,89 @@ public class ClientTest
 		chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		chatFrame.setSize(600,480);
 		chatFrame.setVisible(true);
+		Thread listen = new Thread(new Runnable() {
+			public void run() {
+				String msg = "";
+				try {
+					while(true)
+						display(client.getMessage());
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				display(msg);
+			}
+		}); listen.start();
+	}
+	
+	public void display(final String message) {
+		try {
+			 System.out.println("reader on");
+			 EventQueue.invokeLater(new Runnable() {
+				 public void run() {
+					 try {
+						 chatBox.append(message);
+					 }catch(Exception e) {
+						 e.printStackTrace();
+					 }
+				 }
+			 });
+		       
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
 	public static void main(String [] args) throws InterruptedException {
+		 SwingUtilities.invokeLater(new Runnable () {
+	            public void run() {
+	                try{
+	                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                ClientTest mainGUI = new ClientTest();
+	                try {
+						mainGUI.preDisplay();
+					} catch (NumberFormatException | InvalidKeySpecException | IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	                
+	                /*
+	    			 if(isChatting) {
+	    				 try {
+	    					 DataInputStream din = client.getReader();
+	    					 System.out.println("reader on");
+	    				        EventQueue.invokeLater(new Runnable() {
+	    				            //@Override
+	    				            public void run() {
+	    				                try {
+	    				                	do {
+	    				                		
+	    				                		System.out.println("SCOOP");
+	    				                		String test = din.readUTF();
+	    				                		chatBox.append(test + "\n");
+	    				                	}while(true);
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+	    				            }
+	    				        });
+	    					 
+	    				 }catch(Exception e2) {
+	    					 e2.printStackTrace();
+	    				 }
+	            }
+	    			 */
+	            
+	            }
+	        });
+
+		/*
 		int port = 2423;
 		
 		//configure ssl
@@ -185,7 +277,7 @@ public class ClientTest
 			outputStream = new DataOutputStream(sslSocket.getOutputStream());
 			inputStream = new DataInputStream(sslSocket.getInputStream());
 			
-			/*
+			
 			// DH key exchange for message encryption
 			try {
 				//generate keys
@@ -221,18 +313,18 @@ public class ClientTest
 			*/
 			
 			// generate instance of client UI
-			ClientTest test = new ClientTest();
+			//ClientTest test = new ClientTest();
 			
-			while(true) {
-				String message = "";
+			//while(true) {
+				//String message = "";
 				
-				message = inputStream.readUTF();
+				//message = inputStream.readUTF();
 				
-				chatBox.append(message + "\n");
+				//chatBox.append(message + "\n");
 							
-			}
-		} catch (Exception e) {
+			//}
+	/*} catch (Exception e) {
 			e.printStackTrace();
-		}
+		} */
 	}
 }
