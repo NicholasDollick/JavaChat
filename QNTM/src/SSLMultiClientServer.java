@@ -1,7 +1,7 @@
 import java.io.*;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -9,10 +9,12 @@ import javax.net.ssl.SSLSocket;
 public class SSLMultiClientServer extends Thread
 {
 	private final int port;
+	private final String serverIP;
 	private ArrayList<SSLClientHandler> clientList  = new ArrayList<>();
 	
-	public SSLMultiClientServer(int serverPort) {
+	public SSLMultiClientServer(int serverPort, String IP) {
 		this.port = serverPort;
+		this.serverIP = IP;
 	}
 	
 	public List<SSLClientHandler> getClients() {
@@ -27,7 +29,7 @@ public class SSLMultiClientServer extends Thread
 		try {
 			SSLServerSocketFactory serverSockFact = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 			System.out.println("{*} Starting Server");
-			SSLServerSocket serverSocket = (SSLServerSocket)serverSockFact.createServerSocket(port);
+			SSLServerSocket serverSocket = (SSLServerSocket)serverSockFact.createServerSocket(port, 0, InetAddress.getByName(serverIP));
 			while(true) {
 				System.out.println("{*} Waiting for clients...");
 				SSLSocket sslConnection = (SSLSocket) serverSocket.accept();

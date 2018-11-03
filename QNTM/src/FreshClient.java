@@ -1,6 +1,7 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -12,15 +13,17 @@ import javax.net.ssl.SSLSocketFactory;
 public class FreshClient extends Thread {
 	private String username;
 	private int port;
+	private String ip;
 	private DataInputStream inputStream;
 	private DataOutputStream outputStream;
 	private byte[] pubKey;
 	private byte[] privKey;
 	private DH dh = new DH();
 
-	public FreshClient(int port, String username) {
+	public FreshClient(String serverIP, int port, String username) {
 		this.port = port;
 		this.username = username;
+		this.ip = serverIP;
 	}
 	
 	//connections client to server
@@ -29,7 +32,7 @@ public class FreshClient extends Thread {
 		System.setProperty("javax.net.ssl.trustStorePassword", "asdf123");
 		try {
 			SSLSocketFactory sockFact = (SSLSocketFactory)SSLSocketFactory.getDefault();
-			SSLSocket sslSocket = (SSLSocket)sockFact.createSocket("localhost",port); //something about inet addy might be neded
+			SSLSocket sslSocket = (SSLSocket)sockFact.createSocket(InetAddress.getByName(ip), port); //something about inet addy might be neded
 			initKeys();
 			this.outputStream = new DataOutputStream(sslSocket.getOutputStream());
 			this.inputStream = new DataInputStream(sslSocket.getInputStream());

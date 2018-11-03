@@ -19,6 +19,7 @@ public class ClientTest
 	private static JTextField serverIPInput;
 	private static JTextField portNum;
 	private static int serverPort = 0;
+	private static String serverIP;
 	private static FreshClient client;
 	private static boolean isChatting = false;
 	
@@ -64,6 +65,7 @@ public class ClientTest
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			serverIP = serverIPInput.getText();
             username = usernameBox.getText();
             System.out.println(portNum.getText()); //makre sure this is actually an int before trying
             if(portNum.getText().equals(""))
@@ -76,7 +78,7 @@ public class ClientTest
             	System.out.println("Wrong");
             } else {
                 preFrame.setVisible(false);
-                client = new FreshClient(serverPort, username);
+                client = new FreshClient(serverIP, serverPort, username);
                 client.run();
                 displayChat();
             }
@@ -100,7 +102,7 @@ public class ClientTest
     	usernameBox = new JTextField(15);
     	usernameBox.addActionListener( enterServerAction );
     	passwordBox = new JPasswordField(15);
-    	JLabel chooseUsernameLabel = new JLabel("username:");
+    	JLabel chooseUsernameLabel = new JLabel("Username:");
     	JLabel choosePassword = new JLabel("password:");
     	JButton enterServer = new JButton("Enter Chat Server");
     	JButton createAccount = new JButton("Create Account");
@@ -120,8 +122,8 @@ public class ClientTest
         prePanel.add(usernameBox, preRight);
         //prePanel.add(choosePassword, preLeft);
         //prePanel.add(passwordBox, preRight);
-        //prePanel.add(enterServerIP, preLeft);
-        //prePanel.add(serverIP, preRight);
+        prePanel.add(enterServerIP, preLeft);
+        prePanel.add(serverIP, preRight);
         prePanel.add(port, preLeft);
         prePanel.add(portNum, preRight);
         preFrame.add(prePanel, BorderLayout.CENTER);
