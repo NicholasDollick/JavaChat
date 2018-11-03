@@ -4,11 +4,8 @@ import java.security.spec.InvalidKeySpecException;
 
 public class SSLClientDriver {
 	public static void main(String[] args) throws NumberFormatException, UnknownHostException, InvalidKeySpecException, IOException {
-		String message = "dino: its doing this check per message?";
+s
 		
-		String[] test = message.split(" ");
-		
-		System.out.println(message);
-		System.out.println(test[0].replaceAll(":", ""));
+		//FreshClient test = new FreshClient(2423, "dino");
 	}
 }

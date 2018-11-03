@@ -5,7 +5,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class ClientTest
+public class WorkingTLSClient
 {
 	private static String name = "QNTM v0.5";
 	private String username = ""; //username is received from prechat login	
@@ -24,9 +24,6 @@ public class ClientTest
 	
 	// generic listener for both send button and enter key
 	Action sendMessageAction = new AbstractAction() {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -42,9 +39,7 @@ public class ClientTest
 				// sending message
 				try {
 					String out = messageBox.getText();
-					//byte[] messageOut = AES.encrypt("<" + username + ">"
-						//	+ out, dh.getSecret());
-					String messageOut = (username + ": " + out);
+					String messageOut = ("<" + username + ">" + out);
 					client.sendMessageUTF(messageOut);
 				} catch (Exception e2) {
 					e2.printStackTrace();
@@ -57,9 +52,6 @@ public class ClientTest
 	
 	// generic action for joining server with button or enter key
 	Action enterServerAction = new AbstractAction() {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 2L;
 
 		@Override
@@ -183,7 +175,6 @@ public class ClientTest
 						display(client.getMessage());
 					
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				display(msg);
@@ -193,6 +184,7 @@ public class ClientTest
 	
 	public void display(final String message) {
 		try {
+			 System.out.println("reader on");
 			 EventQueue.invokeLater(new Runnable() {
 				 public void run() {
 					 try {
@@ -217,7 +209,7 @@ public class ClientTest
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
-				ClientTest mainGUI = new ClientTest();
+				WorkingTLSClient mainGUI = new WorkingTLSClient();
 				try {
 					mainGUI.preDisplay();
 				} catch(Exception e)
@@ -228,39 +220,3 @@ public class ClientTest
 		});
 	}
 }
-		
-	
-	        /*
-			// DH key exchange for message encryption
-			try {
-				//generate keys
-				System.out.println("{*} Starting key exchange");
-				dh.generateKeys();
-				System.out.println("{*} Waiting for Key");
-				int len = inputStream.readInt();
-				if(len > 0) {
-					byte[] m = new byte[len];
-					inputStream.readFully(m, 0, m.length);
-					dh.receivePublicKey(m);
-				}
-				System.out.println("{+} Key Recieved");
-				
-				
-				
-				System.out.println("{*} Sending Key");
-				byte[] pubKey = dh.getPublicKeyEnc();
-				len = pubKey.length;
-				outputStream.writeInt(len);
-				outputStream.write(pubKey);
-				System.out.println("{+} Key Sent");
-				
-				dh.getShared();
-				System.out.println(dh.getSecret());
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
-			
-			System.out.println();
-			System.out.println("{+} Communication now encrypted");
-			System.out.println();
-		} */
